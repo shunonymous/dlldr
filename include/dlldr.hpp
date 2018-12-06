@@ -9,6 +9,10 @@
 
 #include <iostream>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 // Workaround for some environment has not std::filesystem
 #ifdef USE_EXPERIMENTAL_FILESYSTEM
 #include <experimental/filesystem>
@@ -39,9 +43,9 @@ namespace filesystem =  std::filesystem;
 
 namespace dlldr
 {
-#if __unix
+//#if __unix
     using error_code = char*;
-#endif
+//#endif
     // class to work with shared library files
     class shared_library;
 
@@ -85,6 +89,9 @@ namespace dlldr
 #if __unix
 	using native_handle_type = void*;
 	using native_symbol_type = void*;
+#elif _WIN32
+	using native_handle_type = HMODULE;
+	using native_symbol_type = FARPROC;
 #endif
 
 	// 31.3.1.1 dll_mode operators [dll.dll_mode.operators]
@@ -112,6 +119,7 @@ namespace dlldr
 	native_handle_type handler;
 	void load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec);
 	native_symbol_type getSymAddr(const char* symbol_name);
+	void decoretion(std::vector<filesystem::path>& path_list);
     public:
 	// public member functions
 	shared_library& operator=(shared_library&& lib) noexcept;
