@@ -1,6 +1,6 @@
 /* dlldr.hpp
  * Author: Shun Terabayashi <shunonymous@gmail.com>
- * Referenced http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0275r3.html
+ * Referenced http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0275r4.html
  * License: Boost Software License Version 1.0
  */
 
@@ -46,17 +46,10 @@ namespace dlldr
 //#if __unix
     using error_code = char*;
 //#endif
-    // class to work with shared library files
+    // IV.4, shared_library
     class shared_library;
 
-    bool operator==(const shared_library& lhs, const shared_library& rhs) noexcept;
-    bool operator!=(const shared_library& lhs, const shared_library& rhs) noexcept;
-    bool operator< (const shared_library& lhs, const shared_library& rhs) noexcept;
-    bool operator> (const shared_library& lhs, const shared_library& rhs) noexcept;
-    bool operator<=(const shared_library& lhs, const shared_library& rhs) noexcept;
-    bool operator>=(const shared_library& lhs, const shared_library& rhs) noexcept;
-
-    // free functions
+    // IV.5, runtime path functions
     template<class T>
     filesystem::path symbol_location(const T& symbol, error_code& ec);
     template<class T>
@@ -68,12 +61,9 @@ namespace dlldr
     filesystem::path program_location(error_code& ec);
     filesystem::path program_location();
 
-
-
-    // support
+    // IV.6, hash support
     template <class T> struct hash;
     template <> struct hash<shared_library>;
-
 
     class shared_library {
     private:
@@ -94,9 +84,10 @@ namespace dlldr
 	using native_symbol_type = FARPROC;
 #endif
 
-	// 31.3.1.1 dll_mode operators [dll.dll_mode.operators]
 	// shared library file load modes
 	using dl_mode = uint16_t;
+
+	// IV.4.2, dl_mode constants
 	static constexpr dl_mode rtld_lazy = RTLD_LAZY;
 	static constexpr dl_mode rtld_now = RTLD_NOW;
 	static constexpr dl_mode rtld_global = RTLD_GLOBAL;
@@ -105,34 +96,34 @@ namespace dlldr
 	static constexpr dl_mode add_decorations           = 0b1000'0000'0000'0000;
 	static constexpr dl_mode search_system_directories = 0b0100'0000'0000'0000;
 
-	// construct/copy/destruct
-	shared_library() noexcept {}
+	// IV.4.3, construct/copy/destruct
+	constexpr shared_library() noexcept;
 	shared_library(shared_library&& lib) noexcept;
-      
+	shared_library& operator=(shared_library&& lib) noexcept;
+	~shared_library();
+
 	explicit shared_library(const filesystem::path& library_path);
 	shared_library(const filesystem::path& library_path, dl_mode mode);
 	shared_library(const filesystem::path& library_path, error_code& ec);
 	shared_library(const filesystem::path& library_path, dl_mode mode, error_code& ec);
-	~shared_library();
 
     private:
 	native_handle_type handler;
 	void load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec);
-	native_symbol_type getSymAddr(const char* symbol_name);
+	native_symbol_type getSymAddr(const char* symbol_name) const;
 	void decoretion(std::vector<filesystem::path>& path_list);
     public:
-	// public member functions
-	shared_library& operator=(shared_library&& lib) noexcept;
+	// IV.4.4, public member functions
 	void reset() noexcept;
 	explicit operator bool() const noexcept;
 
 	template <typename SymbolT>
-	SymbolT* get_if(const char* symbol_name) noexcept {
+	SymbolT* get_if(const char* symbol_name) const {
 	    return reinterpret_cast<SymbolT*>(getSymAddr(symbol_name));
 	}
 
 	template <typename SymbolT>
-	SymbolT* get_if(const std::string& symbol_name) const noexcept { return get_if<SymbolT>(symbol_name.c_str()); }
+	SymbolT* get_if(const std::string& symbol_name) const { return get_if<SymbolT>(symbol_name.c_str()); }
 
 	template <typename SymbolT>
 	SymbolT& get(const char* symbol_name) const;
@@ -140,9 +131,11 @@ namespace dlldr
 	template <typename SymbolT>
 	SymbolT& get(const std::string& symbol_name) const;
 
-//	native_handle_type native_handle() const noexcept;
+	native_handle_type native_handle() const noexcept;
 
-	// public static member functions
+//	strong_ordering operator<=>(const shared_library& other) const noexcept;
+
+	// IV.4.5, public static member functions
 	static constexpr bool platform_supports_dl() noexcept;
 	static constexpr bool platform_supports_dl_of_program() noexcept;
     };

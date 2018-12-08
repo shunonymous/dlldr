@@ -1,4 +1,4 @@
-/* dlldr-dlopen.cpp - A implimentation of P0275R3, POSIX specific part
+/* dlldr-dlopen.cpp - A implimentation of P0275R4, POSIX specific part
  * Author: Shun Terabayashi <shunonymous@gmail.com>
  * License: Boost Software License Version 1.0
  */
@@ -16,6 +16,7 @@ namespace filesystem =  std::filesystem;
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <dlfcn.h>
 
@@ -70,7 +71,7 @@ namespace dlldr
 	dlclose(handler);
     }
 
-    shared_library::native_symbol_type shared_library::getSymAddr(const char* symbol_name)
+    shared_library::native_symbol_type shared_library::getSymAddr(const char* symbol_name) const
     {
 	char* error;
 	void* symaddr;

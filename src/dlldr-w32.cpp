@@ -1,4 +1,4 @@
-/* dlldr-w32.cpp - A implimentation of P0275R3, Win32API specific part
+/* dlldr-w32.cpp - A implimentation of P0275R4, Win32API specific part
  * Author: Shun Terabayashi <shunonymous@gmail.com>
  * License: Boost Software License Version 1.0
  */
@@ -58,10 +58,9 @@ namespace dlldr
 	FreeLibrary(handler);
     }
 
-    shared_library::native_symbol_type shared_library::getSymAddr(const char* symbol_name)
+    shared_library::native_symbol_type shared_library::getSymAddr(const char* symbol_name) const
     {
 	FARPROC symaddr = GetProcAddress(handler, symbol_name);
-
 	return symaddr;
     }
 }

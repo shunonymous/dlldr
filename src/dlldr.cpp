@@ -1,4 +1,4 @@
-/* dlldr.cpp - A implimentation of P0275R3, platform independation part
+/* dlldr.cpp - A implimentation of P0275R4, platform independation part
  * Author: Shun Terabayashi <shunonymous@gmail.com>
  * License: Boost Software License Version 1.0
  */
