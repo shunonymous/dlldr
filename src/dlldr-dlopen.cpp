@@ -16,7 +16,6 @@ namespace filesystem =  std::filesystem;
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <dlfcn.h>
 
@@ -26,46 +25,25 @@ namespace dlldr
 {
     void shared_library::load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec)
     {
-	libpath = library_path;
+	std::vector<filesystem::path> path_list = decoration(library_path, mode);
 
-	// TODO: Extend "lib"
-	if((mode bitand add_decorations) == add_decorations)
-	{
-	    libpath += Extension;
-	    mode = mode xor add_decorations;
-	}
-	
-	if((mode bitand search_system_directories) == search_system_directories)
-	{
-	    if(libpath.has_parent_path())
-		std::cerr << "WARNING: dlldr: library_libpath includes directory in search_system_directories mode, strip." << std::endl;
+	if(mode == 0)
+	    mode = default_mode;
 
-	    // When libpath not includes "/", dlopen searches library from system directories.
-	    libpath = libpath.filename();
-	    mode = mode xor search_system_directories;
-	} else {
-	    // If libpath not includes "/", add "./" to top and to be recognized as relative libpath by dlopen.
-	    if(!libpath.has_parent_path())
-		libpath = filesystem::path("./") / libpath;
-	}
+	for(auto&& p : path_list)
+	    if(!handler)
+	    {
+		handler = dlopen(p.c_str(), mode);
 
-	handler = dlopen(libpath.c_str(), mode);
-
-	if(!handler)
-	{
-	    ec = dlerror();
-	    std::cerr << library_path.c_str() << " failed to load, " << ec << std::endl;
-	}
-
-	dlerror();
+		if(!handler)
+		{
+		    ec = dlerror();
+		    std::cerr << p.c_str() << " failed to load, " << ec << std::endl;
+		}
+		dlerror();
+	    }
     }
 
-/*    template <typename SymbolT>
-      SymbolT* shared_library::get_if(const char* symbol_name) const noexcept
-      {
-      return dlsym(handler, symbol_name);
-      }
-*/
     shared_library::~shared_library()
     {
 	dlclose(handler);

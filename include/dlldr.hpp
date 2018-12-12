@@ -11,6 +11,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+//#define UNICODE
 #endif
 
 // Workaround for some environment has not std::filesystem
@@ -38,8 +39,8 @@ namespace filesystem =  std::filesystem;
 #define RTLD_GLOBAL 0
 #endif // _POSIX_C_SOURCE
 
-
 #include <string>
+#include <vector>
 
 namespace dlldr
 {
@@ -67,19 +68,18 @@ namespace dlldr
 
     class shared_library {
     private:
-#if __unix || !(__apple)
-	std::string Extension = ".so";
-#elif __apple
-	std::string Extension = ".dylib";
-#elif _WIN32
-	std::string Extension = ".dll";
+#if defined (__unix) && !defined (__apple) && !defined (_WIN32)
+	const std::vector<std::string> decorate_formats = {"lib$1.so"};
+#elif defined (__apple)
+	const std::vector<std::string> decorate_formats = {"lib$1.dylib", "lib$1.so"};
+#elif defined (_WIN32)
+	const std::vector<std::string> decorate_formats = {"$1.dll", "lib$1.dll"};
 #endif
-	filesystem::path libpath;
     public:
-#if __unix
+#if defined (__unix) && !defined (_WIN32)
 	using native_handle_type = void*;
 	using native_symbol_type = void*;
-#elif _WIN32
+#elif defined (_WIN32)
 	using native_handle_type = HMODULE;
 	using native_symbol_type = FARPROC;
 #endif
@@ -108,10 +108,10 @@ namespace dlldr
 	shared_library(const filesystem::path& library_path, dl_mode mode, error_code& ec);
 
     private:
-	native_handle_type handler;
+	native_handle_type handler = nullptr;
 	void load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec);
 	native_symbol_type getSymAddr(const char* symbol_name) const;
-	void decoretion(std::vector<filesystem::path>& path_list);
+	std::vector<filesystem::path> decoration(const filesystem::path& library_path, dl_mode& mode);
     public:
 	// IV.4.4, public member functions
 	void reset() noexcept;

@@ -3,7 +3,7 @@
  * License: Boost Software License Version 1.0
  */
 
-#define UNICODE
+//#define UNICODE
 
 #include <windows.h>
 
@@ -27,30 +27,11 @@ namespace dlldr
 {
     void shared_library::load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec)
     {
-	libpath = library_path;
+	std::vector<filesystem::path> path_list = decoration(library_path, mode);
 
-	// TODO: Extend "lib"
-	if((mode bitand add_decorations) == add_decorations)
-	{
-//	    libpath += Extension;
-	    mode = mode xor add_decorations;
-	}
-	
-	if((mode bitand search_system_directories) == search_system_directories)
-	{
-//	    if(libpath.has_parent_path())
-//		std::cerr << "WARNING: dlldr: library_libpath includes directory in search_system_directories mode, strip." << std::endl;
-
-	    // When libpath not includes "/", dlopen searches library from system directories.
-//	    libpath = libpath.filename();
-	    mode = mode xor search_system_directories;
-	} else {
-	    // If libpath not includes "/", add "./" to top and to be recognized as relative libpath by dlopen.
-//	    if(!libpath.has_parent_path())
-//		libpath = filesystem::path(".\\") / libpath;
-	}
-
-	handler = LoadLibrary(libpath.c_str());
+	for(auto&& p : path_list)
+	    if(!handler)
+		handler = LoadLibraryW(p.native().c_str());
     }
 
     shared_library::~shared_library()
