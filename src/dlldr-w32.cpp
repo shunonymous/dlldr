@@ -34,7 +34,7 @@ namespace dlldr
 		handler = LoadLibraryW(p.native().c_str());
     }
 
-    shared_library::~shared_library()
+    void shared_library::unload_library() noexcept
     {
 	FreeLibrary(handler);
     }

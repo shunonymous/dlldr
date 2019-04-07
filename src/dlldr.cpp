@@ -4,16 +4,16 @@
  */
 
 #include <vector>
+#include <regex>
 
 #include "dlldr.hpp"
-#include <regex>
 
 namespace dlldr
 {
     // Copy constructor
     shared_library::shared_library(shared_library&& lib) noexcept
     {
-
+	handler = lib.handler;
     }
 
     shared_library::shared_library(const filesystem::path& library_path)
@@ -36,6 +36,11 @@ namespace dlldr
     shared_library::shared_library(const filesystem::path& library_path, dl_mode mode, error_code& ec)
     {
 	load_library(library_path, mode, ec);
+    }
+
+    void shared_library::reset() noexcept
+    {
+	unload_library();
     }
 
     std::vector<filesystem::path> shared_library::decoration(const filesystem::path& library_path, dl_mode& mode)

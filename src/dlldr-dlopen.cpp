@@ -44,7 +44,7 @@ namespace dlldr
 	    }
     }
 
-    shared_library::~shared_library()
+    void shared_library::unload_library() noexcept
     {
 	dlclose(handler);
     }

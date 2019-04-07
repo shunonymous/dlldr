@@ -110,6 +110,7 @@ namespace dlldr
     private:
 	native_handle_type handler = nullptr;
 	void load_library(const filesystem::path& library_path, shared_library::dl_mode mode, error_code& ec);
+	void unload_library() noexcept;
 	native_symbol_type getSymAddr(const char* symbol_name) const;
 	std::vector<filesystem::path> decoration(const filesystem::path& library_path, dl_mode& mode);
     public:
