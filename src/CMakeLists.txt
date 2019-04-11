@@ -9,4 +9,4 @@ elseif(WIN32)
   add_library(dlldr-platform STATIC dlldr-w32.cpp)
 endif()
 
-target_link_libraries(dlldr ${CMAKE_DL_LIBS} stdc++fs dlldr-platform)
+target_link_libraries(dlldr ${CMAKE_DL_LIBS} ${CXXFS_LIBRARY} dlldr-platform)
