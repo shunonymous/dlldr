@@ -39,7 +39,8 @@ namespace filesystem =  std::filesystem;
 #define RTLD_GLOBAL 0
 #endif // _POSIX_C_SOURCE
 
-#include <string>
+#include <string_view>
+#include <array>
 #include <vector>
 
 namespace dlldr
@@ -69,11 +70,11 @@ namespace dlldr
     class shared_library {
     private:
 #if defined (__unix) && !defined (__apple) && !defined (_WIN32)
-	const std::vector<std::string> decorate_formats = {"lib$1.so"};
+	static constexpr std::array<std::string_view, 1> decorate_formats = {"lib$1.so"};
 #elif defined (__apple)
-	const std::vector<std::string> decorate_formats = {"lib$1.dylib", "lib$1.so"};
+	static constexpr std::array<std::string_view, 2> decorate_formats = {"lib$1.dylib", "lib$1.so"};
 #elif defined (_WIN32)
-	const std::vector<std::string> decorate_formats = {"$1.dll", "lib$1.dll"};
+	static constexpr std::array<std::string_view, 2> decorate_formats = {"$1.dll", "lib$1.dll"};
 #endif
     public:
 #if defined (__unix) && !defined (_WIN32)
@@ -97,10 +98,8 @@ namespace dlldr
 	static constexpr dl_mode search_system_directories = 0b0100'0000'0000'0000;
 
 	// IV.4.3, construct/copy/destruct
-	constexpr shared_library() noexcept;
-	shared_library(shared_library&& lib) noexcept;
-	shared_library& operator=(shared_library&& lib) noexcept;
-	~shared_library();
+	constexpr shared_library() noexcept{}
+	~shared_library() { reset(); }
 
 	explicit shared_library(const filesystem::path& library_path);
 	shared_library(const filesystem::path& library_path, dl_mode mode);

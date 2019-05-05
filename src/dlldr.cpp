@@ -10,12 +10,6 @@
 
 namespace dlldr
 {
-    // Copy constructor
-    shared_library::shared_library(shared_library&& lib) noexcept
-    {
-	handler = lib.handler;
-    }
-
     shared_library::shared_library(const filesystem::path& library_path)
     {
 	error_code ec;
@@ -72,7 +66,7 @@ namespace dlldr
 		// /usr/lib/example -> /usr/lib/libexample.so
 		decorated_pathes.push_back(
 		    path.replace_filename(
-			std::regex_replace(library_path.filename().string(), re, fmt)));
+			std::regex_replace(library_path.filename().string(), re, fmt.data())));
 	    }
 	    mode = mode xor add_decorations;
 	} else {
